@@ -23,15 +23,22 @@ module.exports =
         for menu in atom.menu.template
             if menu.label == "Packages"
                 submenu = {label: "Localization", submenu: []}
+                listeners = {}
                 for lang in languages
                     l = lang["language"]
-                    p = lang['path']
-                    item = {label: l, command: "localization:#{ p }"}
-                    atom.workspaceView.command("localization:#{ p }",null,{data:l},((e)=>
-                        atom.config.set("localization.CurrentLanguage", e.data)
-                        atom.reload()
-                        ))
+                    p = lang["path"]
+                    cmd = "localization:#{ p }"
+
+                    item = {label: l, command: cmd}
                     submenu.submenu.push(item)
+
+                    listeners[cmd] = (()->
+                      _l = l
+                      (e)->
+                        atom.config.set("localization.CurrentLanguage", _l)
+                        atom.reload()
+                    )()
+                atom.commands.add "atom-workspace", listeners
                 menu.submenu.push(submenu)
 
     activate: (state) ->
